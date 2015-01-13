@@ -2,6 +2,8 @@ var express = require('express');
 var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
+var session = require('express-session');
+var bcrypt = require('bcrypt-nodejs');
 
 
 var db = require('./app/config');
@@ -21,7 +23,8 @@ app.use(bodyParser.json());
 // Parse forms (signup/login)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
-
+app.use(session({secret: 'ssshhhhh', resave: false, saveUninitialized: false}));
+// app.use(bcrypt.compare);
 
 app.get('/',
 function(req, res) {
@@ -89,10 +92,31 @@ function(req, res) {
   var username = req.body.username;
   var password = req.body.password;
 
-  // if username does not exist, send to signup page
-  // if username exists in db, but wrong password... send message "incorrect password"
-  // if username exists and password matches, send to index.html
-  if (username) {}
+  new User({ username: username }).fetch().then(function(userFound) {
+    if(userFound) {
+      bcrypt.hash(username, userFound.attributes.salt, null, function(err, newHash){
+        // console.log(username);
+        // console.log(newHash);
+        if (newHash === userFound.attributes.password) {
+          req.session.regenerate(function(){
+            req.session.user = username;
+            res.redirect('/index');
+          });
+        } else {
+          // if username exists in db, but wrong password... send message "incorrect password"
+          res.redirect('/login');
+        }
+      });
+
+    // if username does not exist, send to signup page
+    } else {
+      res.redirect('/signup');
+    }
+
+      // brcrypt.compare(password, userFound.attributes.password, function(err, match) {
+    //     if (match) {
+
+  });
 });
 
 
@@ -112,23 +136,21 @@ function(req, res) {
     // if username exists,
       // notify client that it's taken and ask for a new username
       console.log('Username already exists');
-      res.send(404);
+      res.redirect('signup');
     } else {
     // if username !exist,  -- SELECT username FROM users WHERE username = username;
       // res.send(201)
       // enter username and password into db.collection / users collection
       var user = new User({
         username: username,
-        password: password
-        // base_url: req.headers.origin
+        password: password,
       });
 
       user.save().then(function(newUser) {
         Users.add(newUser);
-        console.log('saved new user');
-        // continue to index.html
-        res.redirect('/index');   //200,
+        res.redirect('/index');
       });
+
     }
   });
 });
