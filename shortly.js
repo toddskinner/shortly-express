@@ -44,6 +44,7 @@ app.get('/links',
 function(req, res) {
   Links.reset().fetch().then(function(links) {
     res.send(200, links.models);
+    // res.redirect('index');
   });
 });
 
@@ -88,6 +89,7 @@ function(req, res) {
 
 app.get('/login',
 function(req, res) {
+  // req.session.destroy();
   res.render('login');
 });
 
@@ -102,7 +104,7 @@ function(req, res) {
         if (newHash === userFound.attributes.password) {
           req.session.regenerate(function(){
             req.session.user = username;
-            res.redirect('/index');
+            res.redirect('/index');  // + username);
           });
         } else {
           // if username exists in db, but wrong password... send message "incorrect password"
@@ -157,6 +159,15 @@ function(req, res) {
   });
 });
 
+app.get('/logout', function(req, res) {
+  req.session.destroy();
+  res.redirect('login');
+});
+
+app.post('/logout', function(req, res) {
+  req.session.destroy();
+  res.redirect('login');
+});
 
 /************************************************************/
 // Handle the wildcard route last - if all other routes fail
