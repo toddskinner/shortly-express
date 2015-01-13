@@ -28,12 +28,16 @@ app.use(session({secret: 'ssshhhhh', resave: false, saveUninitialized: false}));
 
 app.get('/',
 function(req, res) {
-  res.render('index');
+  util.checkUser(req, res, function() {
+    res.render('index');
+  });
 });
 
 app.get('/create',
 function(req, res) {
-  res.render('index');
+  util.checkUser(req, res, function() {
+    res.render('index');
+  });
 });
 
 app.get('/links',
@@ -94,9 +98,7 @@ function(req, res) {
 
   new User({ username: username }).fetch().then(function(userFound) {
     if(userFound) {
-      bcrypt.hash(username, userFound.attributes.salt, null, function(err, newHash){
-        // console.log(username);
-        // console.log(newHash);
+      bcrypt.hash(password, userFound.attributes.salt, null, function(err, newHash){
         if (newHash === userFound.attributes.password) {
           req.session.regenerate(function(){
             req.session.user = username;
