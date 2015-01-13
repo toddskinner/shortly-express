@@ -23,24 +23,24 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 
 
-app.get('/', 
+app.get('/',
 function(req, res) {
   res.render('index');
 });
 
-app.get('/create', 
+app.get('/create',
 function(req, res) {
   res.render('index');
 });
 
-app.get('/links', 
+app.get('/links',
 function(req, res) {
   Links.reset().fetch().then(function(links) {
     res.send(200, links.models);
   });
 });
 
-app.post('/links', 
+app.post('/links',
 function(req, res) {
   var uri = req.body.url;
 
@@ -78,6 +78,60 @@ function(req, res) {
 // Write your authentication routes here
 /************************************************************/
 
+
+app.get('/login',
+function(req, res) {
+  res.render('login');
+});
+
+app.post('/login',
+function(req, res) {
+  var username = req.body.username;
+  var password = req.body.password;
+
+  // if username does not exist, send to signup page
+  // if username exists in db, but wrong password... send message "incorrect password"
+  // if username exists and password matches, send to index.html
+  if (username) {}
+});
+
+
+app.get('/signup',
+function(req, res) {
+  res.render('signup');
+});
+
+app.post('/signup',
+function(req, res) {
+  var username = req.body.username;
+  var password = req.body.password;
+
+  new User({ username: username }).fetch().then(function(found) {
+  // check whether username exists or not
+    if (found) {
+    // if username exists,
+      // notify client that it's taken and ask for a new username
+      console.log('Username already exists');
+      res.send(404);
+    } else {
+    // if username !exist,  -- SELECT username FROM users WHERE username = username;
+      // res.send(201)
+      // enter username and password into db.collection / users collection
+      var user = new User({
+        username: username,
+        password: password
+        // base_url: req.headers.origin
+      });
+
+      user.save().then(function(newUser) {
+        Users.add(newUser);
+        console.log('saved new user');
+        // continue to index.html
+        res.redirect('/index');   //200,
+      });
+    }
+  });
+});
 
 
 /************************************************************/
