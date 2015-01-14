@@ -26,22 +26,23 @@ app.use(express.static(__dirname + '/public'));
 app.use(session({secret: 'ssshhhhh', resave: false, saveUninitialized: false}));
 // app.use(bcrypt.compare);
 
-app.get('/',
-function(req, res) {
-  util.checkUser(req, res, function() {
-    res.render('index');
-  });
+// REFACTOR
+// app.get('/',
+// function(req, res) {
+//   util.checkUser(req, res, function() {
+//     res.render('index');
+//   });
+// });
+
+app.get('/', util.checkUser, function(req, res) {
+  res.render('index');
 });
 
-app.get('/create',
-function(req, res) {
-  util.checkUser(req, res, function() {
-    res.render('index');
-  });
+app.get('/create', util.checkUser, function(req, res) {
+  res.render('index');
 });
 
-app.get('/links',
-function(req, res) {
+app.get('/links', util.checkUser, function(req, res) {
   Links.reset().fetch().then(function(links) {
     res.send(200, links.models);
     // res.redirect('index');
@@ -104,7 +105,7 @@ function(req, res) {
         if (newHash === userFound.attributes.password) {
           req.session.regenerate(function(){
             req.session.user = username;
-            res.redirect('/index');  // + username);
+            res.redirect('/matt');
           });
         } else {
           // if username exists in db, but wrong password... send message "incorrect password"
@@ -140,7 +141,7 @@ function(req, res) {
     // if username exists,
       // notify client that it's taken and ask for a new username
       console.log('Username already exists');
-      res.redirect('signup');
+      res.redirect('/signup');
     } else {
     // if username !exist,  -- SELECT username FROM users WHERE username = username;
       // res.send(201)
@@ -160,13 +161,15 @@ function(req, res) {
 });
 
 app.get('/logout', function(req, res) {
-  req.session.destroy();
-  res.redirect('login');
+  req.session.destroy(function(){
+    res.redirect('/login');
+  });
 });
 
 app.post('/logout', function(req, res) {
-  req.session.destroy();
-  res.redirect('login');
+  req.session.destroy(function(){
+    res.redirect('/login');
+  });
 });
 
 /************************************************************/

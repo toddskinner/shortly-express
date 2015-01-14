@@ -5,8 +5,8 @@ Shortly.Router = Backbone.Router.extend({
 
   routes: {
     '':       'index',
-    'create': 'create',
-    'logout': 'logout'
+    'create': 'create' //,
+    // 'logout': 'logout'
   },
 
   swapView: function(view){
@@ -21,10 +21,10 @@ Shortly.Router = Backbone.Router.extend({
 
   create: function(){
     this.swapView(new Shortly.createLinkView());
-  },
-
-  logout: function(){
-    console.log("ROUTER LOGOUT");
   }
 
+  // Need to create some sort of endpoint to connect this to the backend and kill the cookie!
+  // logout: function(){
+    // this.swapView()
+  // }
 });
